@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AiPilote — Chatbot AI pour votre site web</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060810;
+      --surface: #0d1120;
+      --border: rgba(255,255,255,0.07);
+      --accent: #00e5ff;
+      --accent2: #7b5cf0;
+      --text: #e8eaf0;
+      --muted: #7a8099;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* BACKGROUND GLOW */
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0,229,255,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(123,92,240,0.08) 0%, transparent 70%);
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 6%;
+      background: rgba(6,8,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.35rem;
+      color: #fff; text-decoration: none;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .logo-dot { color: var(--accent); }
+
+    nav a.nav-cta {
+      font-size: 0.85rem; font-weight: 500;
+      color: var(--bg); background: var(--accent);
+      padding: 0.55rem 1.3rem; border-radius: 999px;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    nav a.nav-cta:hover { opacity: 0.85; }
+
+    /* HERO */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 7rem 6% 4rem;
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--accent);
+      border: 1px solid rgba(0,229,255,0.25);
+      background: rgba(0,229,255,0.06);
+      padding: 0.4rem 1rem; border-radius: 999px;
+      margin-bottom: 1.8rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: clamp(2.4rem, 6vw, 4.2rem);
+      line-height: 1.1; letter-spacing: -0.02em;
+      max-width: 780px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    h1 em { font-style: normal; color: var(--accent); }
+
+    .hero-sub {
+      margin-top: 1.4rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      font-weight: 300; color: var(--muted);
+      max-width: 560px; line-height: 1.65;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--accent); color: var(--bg);
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+      padding: 0.85rem 2rem; border-radius: 999px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px rgba(0,229,255,0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,229,255,0.4); }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: transparent; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 400;
+      padding: 0.85rem 2rem; border-radius: 999px;
+      text-decoration: none; border: 1px solid var(--border);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
+
+    /* CHAT MOCKUP */
+    .chat-mockup {
+      position: relative; z-index: 1;
+      margin: 4rem auto 0;
+      max-width: 420px; width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,229,255,0.05);
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .chat-header {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .chat-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .chat-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; }
+    .chat-status { font-size: 0.72rem; color: #4ade80; }
+    .chat-online { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; margin-right: 4px; }
+
+    .msg { display: flex; flex-direction: column; gap: 0.7rem; }
+    .msg-bot, .msg-user {
+      max-width: 85%; padding: 0.65rem 1rem;
+      border-radius: 14px; font-size: 0.88rem; line-height: 1.5;
+      animation: fadeUp 0.4s ease both;
+    }
+    .msg-bot { background: rgba(255,255,255,0.06); border-bottom-left-radius: 4px; align-self: flex-start; }
+    .msg-user { background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(123,92,240,0.15)); border: 1px solid rgba(0,229,255,0.2); border-bottom-right-radius: 4px; align-self: flex-end; }
+    .msg-bot:nth-child(2) { animation-delay: 0.6s; }
+    .msg-user:nth-child(3) { animation-delay: 1s; }
+    .msg-bot:nth-child(4) { animation-delay: 1.4s; }
+
+    /* STATS */
+    .stats {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+      padding: 3rem 6%;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 2.2rem; color: #fff;
+    }
+    .stat-num span { color: var(--accent); }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* SECTION */
+    section {
+      position: relative; z-index: 1;
+      padding: 5rem 6%;
+    }
+
+    .section-label {
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      letter-spacing: -0.02em; max-width: 600px;
+    }
+    h2 em { font-style: normal; color: var(--accent); }
+
+    .section-sub {
+      margin-top: 1rem; color: var(--muted);
+      font-size: 1rem; font-weight: 300; max-width: 500px; line-height: 1.7;
+    }
+
+    /* FEATURES */
+    .features-grid {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(0,229,255,0.2); transform: translateY(-4px); }
+
+    .feature-icon {
+      font-size: 1.8rem; margin-bottom: 1rem;
+      width: 52px; height: 52px;
+      background: rgba(0,229,255,0.07);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .feature-title {
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 1.05rem; margin-bottom: 0.5rem;
+    }
+
+    .feature-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+    /* HOW IT WORKS */
+    .steps {
+      margin-top: 3.5rem;
+      display: flex; flex-direction: column; gap: 2rem;
+      max-width: 640px;
+    }
+
+    .step {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem;
+      color: var(--bg);
+    }
+
+    .step-content h3 {
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 1.05rem; margin-bottom: 0.4rem;
+    }
+    .step-content p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+    /* CTA SECTION */
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(123,92,240,0.08));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      margin: 0 6% 5rem;
+      padding: 4rem 2rem;
+    }
+
+    .cta-section h2 { margin: 0 auto 1rem; text-align: center; }
+    .cta-section p { margin: 0 auto 2.5rem; }
+
+    /* FOOTER */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 2rem 6%;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--muted);
+    }
+    footer strong { color: var(--text); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .stats { gap: 1.5rem; }
+      .step { flex-direction: column; gap: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">Ai<span class="logo-dot">Pilote</span></a>
+  <a class="nav-cta" href="#contact">Démo gratuite</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">
+    <span class="badge-dot"></span>
+    Chatbot AI · Disponible 24h/24
+  </div>
+
+  <h1>Votre <em>assistant IA</em><br/>répond à vos clients<br/>à votre place</h1>
+
+  <p class="hero-sub">
+    J'installe un chatbot intelligent sur votre site web en 48h. Il répond aux questions, capte des leads et booste vos ventes — même quand vous dormez.
+  </p>
+
+  <div class="hero-cta">
+    <a class="btn-primary" href="#contact">
+      ✦ Demander une démo gratuite
+    </a>
+    <a class="btn-secondary" href="#comment">
+      Voir comment ça marche →
+    </a>
+  </div>
+
+  <!-- CHAT MOCKUP -->
+  <div class="chat-mockup">
+    <div class="chat-header">
+      <div class="chat-avatar">🤖</div>
+      <div>
+        <div class="chat-name">Assistant AiPilote</div>
+        <div class="chat-status"><span class="chat-online"></span>En ligne maintenant</div>
+      </div>
+    </div>
+    <div class="msg">
+      <div class="msg-bot">👋 Bonjour ! Comment puis-je vous aider aujourd'hui ?</div>
+      <div class="msg-user">Quels sont vos horaires d'ouverture ?</div>
+      <div class="msg-bot">Nous sommes ouverts du lundi au vendredi de 9h à 18h. Puis-je vous aider avec autre chose ? 😊</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">24<span>/7</span></div>
+    <div class="stat-label">Disponibilité totale</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num"><span>+</span>60<span>%</span></div>
+    <div class="stat-label">De leads capturés</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">48<span>h</span></div>
+    <div class="stat-label">Délai d'installation</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num"><span>-</span>70<span>%</span></div>
+    <div class="stat-label">De questions répétitives</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="fonctionnalites">
+  <div class="section-label">Fonctionnalités</div>
+  <h2>Tout ce dont votre<br/>entreprise a <em>besoin</em></h2>
+  <p class="section-sub">Un chatbot AI sur-mesure, formé sur votre activité, vos produits et vos clients.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <div class="feature-title">Réponses instantanées</div>
+      <div class="feature-desc">Votre chatbot répond en quelques secondes aux questions fréquentes de vos clients, sans attente.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Capture de leads</div>
+      <div class="feature-desc">Il collecte automatiquement les emails et numéros de téléphone de vos visiteurs intéressés.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">Formé sur votre activité</div>
+      <div class="feature-desc">Il connaît vos produits, vos tarifs, vos horaires. Chaque réponse est personnalisée pour votre business.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div class="feature-title">Compatible tout support</div>
+      <div class="feature-desc">Fonctionne sur tous les sites : Shopify, WordPress, Wix, Webflow, site sur mesure…</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Installation rapide</div>
+      <div class="feature-desc">Mise en place complète en moins de 48h. Aucune compétence technique requise de votre côté.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Suivi & optimisation</div>
+      <div class="feature-desc">Accès à un tableau de bord pour voir les conversations et améliorer les réponses en continu.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="comment" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section-label">Processus</div>
+  <h2>Opérationnel en<br/><em>3 étapes simples</em></h2>
+  <p class="section-sub">Pas de prise de tête, pas de technique. Je m'occupe de tout.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>On discute de votre activité</h3>
+        <p>Appel de 30 min pour comprendre vos besoins, vos clients et ce que vous voulez que le chatbot fasse exactement.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Je configure et installe tout</h3>
+        <p>Je forme le chatbot sur votre business et l'installe directement sur votre site web. Zéro effort de votre côté.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Votre IA travaille pour vous</h3>
+        <p>Votre chatbot répond à vos clients 24h/24. Je reste disponible pour ajuster et améliorer les réponses.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="contact" style="padding-top: 5rem; padding-bottom: 0;">
+  <div class="cta-section">
+    <div class="section-label" style="text-align:center;">Contact</div>
+    <h2>Prêt à automatiser<br/>votre <em>service client</em> ?</h2>
+    <p class="section-sub" style="margin: 0 auto 2.5rem; text-align: center;">
+      Démo gratuite et sans engagement. Je vous montre ce que l'IA peut faire pour votre site en 30 minutes.
+    </p>
+    <a class="btn-primary" href="mailto:contact@aipilote.fr" style="font-size: 1.05rem; padding: 1rem 2.5rem;">
+      ✉️ Contacter AiPilote
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <strong>AiPilote</strong> · Chatbot AI pour entreprises · <a href="mailto:contact@aipilote.fr" style="color: var(--accent); text-decoration: none;">contact@aipilote.fr</a>
+</footer>
+
+</body>
+</html>
