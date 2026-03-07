@@ -198,35 +198,6 @@
       transform: translateY(-2px);
       box-shadow: 0 0 44px rgba(0,229,255,0.5);
     }
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    #success {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 48px 20px;
-      text-align: center;
-    }
-    .check {
-      width: 64px; height: 64px;
-      border-radius: 50%;
-      background: rgba(0,229,255,0.1);
-      border: 2px solid var(--cyan);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
-    }
-    #success h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-    }
-    #success h2 span { color: var(--cyan); }
-    #success p { color: var(--muted); font-size: 14px; max-width: 320px; line-height: 1.6; }
 
     footer {
       margin-top: 32px;
@@ -252,119 +223,57 @@
   </header>
 
   <div class="form-card">
+    <form action="https://formspree.io/f/maapnegl" method="POST">
 
-    <div id="form-content">
+      <!-- Redirection après envoi -->
+      <input type="hidden" name="_next" value="https://kemidufranc.github.io/AiPilote/merci.html"/>
+
       <div class="step">
         <label><span class="num">1</span> Nom de votre entreprise ?</label>
-        <input type="text" id="q1" name="Nom entreprise" placeholder="Ex : Salon Beauté Paris"/>
+        <input type="text" name="Nom entreprise" placeholder="Ex : Salon Beauté Paris" required/>
       </div>
       <hr class="divider"/>
 
       <div class="step">
         <label><span class="num">2</span> URL de votre site web ?</label>
-        <input type="url" id="q2" name="Site web" placeholder="https://www.monsite.com"/>
+        <input type="url" name="Site web" placeholder="https://www.monsite.com" required/>
       </div>
       <hr class="divider"/>
 
       <div class="step">
         <label><span class="num">3</span> Secteur d'activité ?</label>
-        <input type="text" id="q3" name="Secteur activite" placeholder="Ex : Coiffure, Restaurant, Immobilier…"/>
+        <input type="text" name="Secteur activite" placeholder="Ex : Coiffure, Restaurant, Immobilier…" required/>
       </div>
       <hr class="divider"/>
 
       <div class="step">
         <label><span class="num">4</span> Les 5 questions que vos clients posent le plus souvent ?</label>
-        <textarea id="q4" name="Questions frequentes" placeholder="1. Quels sont vos horaires ?&#10;2. Où êtes-vous situé ?&#10;3. …&#10;4. …&#10;5. …"></textarea>
+        <textarea name="Questions frequentes" placeholder="1. Quels sont vos horaires ?&#10;2. Où êtes-vous situé ?&#10;3. …&#10;4. …&#10;5. …" required></textarea>
       </div>
       <hr class="divider"/>
 
       <div class="step">
         <label><span class="num">5</span> Horaires d'ouverture ?</label>
-        <input type="text" id="q5" name="Horaires" placeholder="Ex : Lun–Ven 9h–18h, Sam 10h–15h"/>
+        <input type="text" name="Horaires" placeholder="Ex : Lun–Ven 9h–18h, Sam 10h–15h" required/>
       </div>
       <hr class="divider"/>
 
       <div class="step">
         <label><span class="num">6</span> Tarifs ou produits à mentionner ?</label>
-        <textarea id="q6" name="Tarifs produits" placeholder="Ex : Coupe femme 45€, Couleur 80€…"></textarea>
+        <textarea name="Tarifs produits" placeholder="Ex : Coupe femme 45€, Couleur 80€…" required></textarea>
       </div>
       <hr class="divider"/>
 
       <div class="step">
         <label><span class="num">7</span> Comment le chatbot doit-il se présenter ?</label>
-        <textarea id="q7" name="Presentation chatbot" placeholder="Ex : &quot;Bonjour, je suis Lisa, l'assistante de [Salon]…&quot;"></textarea>
+        <textarea name="Presentation chatbot" placeholder="Ex : &quot;Bonjour, je suis Lisa, l'assistante de [Salon]…&quot;" required></textarea>
       </div>
 
-      <button class="btn-submit" id="submitBtn" onclick="submitForm()">✦ Envoyer ma demande</button>
-    </div>
-
-    <div id="success">
-      <div class="check">✓</div>
-      <h2>Merci ! On vous <span>contacte sous 48h</span></h2>
-      <p>Votre demande a bien été reçue. Je prépare votre chatbot IA personnalisé et reviens vers vous très vite.</p>
-    </div>
-
+      <button type="submit" class="btn-submit">✦ Envoyer ma demande</button>
+    </form>
   </div>
 
   <footer>✦ <strong>AiPilote</strong> — Propulsé par l'intelligence artificielle</footer>
-
-  <script>
-    async function submitForm() {
-      const fields = ['q1','q2','q3','q4','q5','q6','q7'];
-      let allFilled = true;
-
-      fields.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el.value.trim()) {
-          el.style.borderColor = '#ff4d6d';
-          allFilled = false;
-        } else {
-          el.style.borderColor = '';
-        }
-      });
-
-      if (!allFilled) {
-        alert('Merci de remplir tous les champs avant d\'envoyer.');
-        return;
-      }
-
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.textContent = 'Envoi en cours…';
-
-      const data = {
-        "Nom entreprise":       document.getElementById('q1').value,
-        "Site web":             document.getElementById('q2').value,
-        "Secteur activite":     document.getElementById('q3').value,
-        "Questions frequentes": document.getElementById('q4').value,
-        "Horaires":             document.getElementById('q5').value,
-        "Tarifs produits":      document.getElementById('q6').value,
-        "Presentation chatbot": document.getElementById('q7').value
-      };
-
-      try {
-        const response = await fetch('https://formspree.io/f/maapnegl', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-          document.getElementById('form-content').style.display = 'none';
-          const s = document.getElementById('success');
-          s.style.display = 'flex';
-        } else {
-          btn.disabled = false;
-          btn.textContent = '✦ Envoyer ma demande';
-          alert('Une erreur est survenue. Veuillez réessayer.');
-        }
-      } catch (e) {
-        btn.disabled = false;
-        btn.textContent = '✦ Envoyer ma demande';
-        alert('Erreur de connexion. Vérifiez votre internet et réessayez.');
-      }
-    }
-  </script>
 
 </body>
 </html>
